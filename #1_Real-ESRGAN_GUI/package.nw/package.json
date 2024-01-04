@@ -1,0 +1,16 @@
+{
+  "name": "Real-ESRGAN GUI",
+  "version": "1.0.0",
+  "main": "index.html",
+  "window": {
+    "id": "Real-ESRGAN",
+    "width": 500,
+    "height": 400,
+    "min_width": 500,
+    "min_height": 400
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "@types/nw.js": "^0.13.20"
+  }
+}

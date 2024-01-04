@@ -1,0 +1,41 @@
+html,
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+}
+body {
+  display: flex;
+  flex-flow: column;
+}
+.form {
+  flex: auto;
+  margin: 10px;
+  display: flex;
+  flex-flow: column;
+}
+.form-item {
+  display: flex;
+  flex-flow: row nowrap;
+}
+.form-item > span {
+  padding-right: 5px;
+}
+.form-item + .form-item {
+  margin-top: 5px;
+}
+.form-item > file-input {
+  flex: auto;
+}
+select {
+  width: 250px;
+  outline: none;
+}
+#start {
+  margin-left: 5px;
+}
+#log {
+  flex: auto;
+  resize: none;
+  outline: none;
+}

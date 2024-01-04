@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Real-ESRGAN GUI</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <div class="form">
+      <div class="form-item">
+        <span><input type="radio" name="type" value="image" id="image" checked /><label for="image">图片</label></span>
+        <span><input type="radio" name="type" value="video" id="video" /><label for="video">视频</label></span>
+      </div>
+      <div class="form-item">
+        <span>输入文件</span>
+        <file-input id="input" multiple="true" />
+      </div>
+      <div class="form-item">
+        <span>输出目录</span>
+        <file-input id="output" dir="true" dirdesc="选择要保存的目录" />
+      </div>
+      <div class="form-item">
+        <span>缩放等级</span>
+        <select name="scale" id="scale">
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4" selected>4</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <span>使用模型</span>
+        <select name="model" id="model">
+          <option value="realesr-animevideov3">realesr-animevideov3</option>
+          <option value="realesrgan-x4plus" selected>realesrgan-x4plus</option>
+          <option value="realesrgan-x4plus-anime">realesrgan-x4plus-anime</option>
+        </select>
+      </div>
+      <div class="form-item">
+        <span>输出类型</span>
+        <select name="format" id="format">
+          <option type="image" value="jpg" selected>jpg</option>
+          <option type="image" value="png">png</option>
+          <option type="image" value="webp">webp</option>
+          <option type="video" value="mp4">mp4</option>
+        </select>
+      </div>
+      <div class="form-item" style="justify-content: right">
+        <button id="stop">停止</button>
+        <button id="start">开始</button>
+      </div>
+      <div class="form-item" style="flex: auto">
+        <textarea name="log" id="log" disabled></textarea>
+      </div>
+    </div>
+    <script type="module" src="FileInput.js"></script>
+    <script type="module" src="index.js"></script>
+  </body>
+</html>
