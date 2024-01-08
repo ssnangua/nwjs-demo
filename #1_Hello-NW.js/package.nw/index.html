@@ -1,0 +1,35 @@
+<html>
+<head>
+<meta charset="UTF-8" />
+<title>Hello, NW.js</title>
+<style>
+  h1 {
+    text-align: center;
+  }
+  b {
+    display: inline-block;
+    width: 150px;
+    text-align: right;
+  }
+</style>
+</head>
+<body>
+  <h1>Hello, NW.js</h1>
+  <div id="about"></div>
+  <script>
+    const os = require("os");
+    const about = {
+      AppName: nw.App.manifest.name,
+      Version: nw.App.manifest.version,
+      NW: process.versions.nw,
+      Node: process.versions.node,
+      Chromium: process.versions.chromium,
+      V8: process.versions.v8,
+      OS: [os.platform(), os.arch(), os.release()].join(" "),
+    };
+    document.querySelector("#about").innerHTML = Object.entries(about)
+      .map(([key, value]) => `<div><b>${key}：</b>${value}</div>`)
+      .join("");
+  </script>
+</body>
+</html>
