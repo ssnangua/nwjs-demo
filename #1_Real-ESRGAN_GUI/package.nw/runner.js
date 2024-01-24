@@ -21,9 +21,14 @@ export async function onStart({ type, inputs, outputDir, scale, model, format })
     const input = inputs[i];
     log.println(`正在处理 ${input}`);
     // await new Promise((r) => setTimeout(r, 1000));
-    const { dir, name } = path.parse(input);
-    const outputFile = outputDir && path.resolve(outputDir) !== path.resolve(dir) ? `${name}.${format}` : `${name}-output.${format}`;
-    const output = path.join(outputDir || dir, outputFile);
+    let output;
+    if (fs.statSync(input).isFile()) {
+      const { dir, name } = path.parse(input);
+      const outputFile = outputDir && path.resolve(outputDir) !== path.resolve(dir) ? `${name}.${format}` : `${name}-output.${format}`;
+      output = path.join(outputDir || dir, outputFile);
+    } else {
+      output = outputDir || input;
+    }
     await run({ type, input, output, scale, model, format });
   }
   if (!isStop) log.println("完成！");
