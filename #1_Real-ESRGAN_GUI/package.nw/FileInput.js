@@ -108,7 +108,7 @@ class FileInput extends HTMLElement {
       const files = Array.from(e.dataTransfer.files)
         .map((file) => file.path)
         .filter((filePath) => {
-          if (fs.statSync(filePath).isFile) {
+          if (fs.statSync(filePath).isFile()) {
             if (dir) return false;
           } else {
             if (!dir) return false;
