@@ -1,0 +1,13 @@
+{
+  "name": "login-demo",
+  "main": "login.html",
+  "//chromium-args": "--disable-gpu",
+  "window": {
+    "width": 400,
+    "height": 300,
+    "position": "center",
+    "frame": false,
+    "transparent": true,
+    "always_on_top": true
+  }
+}

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>&lt;input&gt; Demo</title>
+    <style>
+      * {
+        font-size: 14px;
+      }
+      pre {
+        display: inline-block;
+        background: #f2f1f1;
+        border-radius: 4px;
+        padding: 5px 10px;
+        font-weight: bold;
+      }
+      body > div {
+        padding-bottom: 10px;
+        border-bottom: 1px solid #ccc;
+      }
+      label {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div><label>打开文件：</label><input type="file" /></div>
+    <div><label>多选文件：</label><input type="file" multiple /></div>
+    <div><label>文件类型：</label><input type="file" accept="image/*,.txt" /></div>
+    <div><label>选择目录：</label><input type="file" nwdirectory nwdirectorydesc="选择目录" /></div>
+    <div><label>初始目录：</label><input type="file" nwworkingdir="c:" /></div>
+    <div><label>　另存为：</label><input type="file" nwsaveas="test.txt" /></div>
+    <script>
+      document.querySelectorAll("div").forEach((div) => {
+        const pre = document.createElement("pre");
+        pre.textContent = div.querySelector("input").outerHTML;
+        div.parentElement.insertBefore(pre, div);
+      });
+      function log(type, e) {
+        console.group(type);
+        console.log("input:", e.target);
+        console.log("value:", e.target.value);
+        console.log("files:", e.target.files);
+        console.groupEnd();
+      }
+      document.querySelectorAll("input").forEach((input) => {
+        input.onchange = (e) => log("change", e);
+        input.oncancel = (e) => log("cancel", e);
+      });
+    </script>
+
+    <!-- 原生API（目前没用） -->
+    <p>
+      <label>原生API：</label>（目前没用）
+      <button id="showOpenFilePicker">showOpenFilePicker</button>
+      <button id="showSaveFilePicker">showSaveFilePicker</button>
+      <button id="showDirectoryPicker">showDirectoryPicker</button>
+    </p>
+    <script>
+      document.querySelector("#showOpenFilePicker").onclick = () => {
+        window
+          .showOpenFilePicker({
+            types: [
+              { description: "JPG", accept: { "image/jpeg": [] } },
+              { description: "PNG", accept: { "image/png": [] } },
+              { description: "GIF", accept: { "image/gif": [] } },
+            ],
+            multiple: true,
+            excludeAcceptAllOption: true,
+          })
+          .then(console.log)
+          .catch(() => console.log("取消"));
+      };
+      document.querySelector("#showSaveFilePicker").onclick = () => {
+        window
+          .showSaveFilePicker({
+            types: [{ description: "TXT", accept: { "text/plain": [".txt", ".log"] } }],
+            suggestedName: "test.txt",
+            excludeAcceptAllOption: true,
+          })
+          .then(console.log)
+          .catch(() => console.log("取消"));
+      };
+      document.querySelector("#showDirectoryPicker").onclick = () => {
+        window
+          .showDirectoryPicker({ startIn: "documents" })
+          .then(console.log)
+          .catch(() => console.log("取消"));
+      };
+    </script>
+  </body>
+</html>

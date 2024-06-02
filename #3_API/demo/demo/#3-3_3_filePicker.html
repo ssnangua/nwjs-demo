@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>File Picker Demo</title>
+  </head>
+  <body>
+    <input id="output" type="text" placeholder="拖放文件到这里" readonly style="width: 400px" />
+    <button id="button">打开</button>
+
+    <script type="module">
+      import filePicker from "./filePicker.js";
+
+      const $output = document.querySelector("#output");
+      const $button = document.querySelector("#button");
+
+      $button.addEventListener("click", () => {
+        filePicker
+          .showOpenDialog({
+            multiple: true,
+            // accept: "image/*,.txt",
+            // openDirectory: false,
+            // title: "选择文件夹",
+            // defaultPath: process.env.USERPROFILE + "\\Downloads",
+          })
+          .then((files) => {
+            console.log("[change]", files);
+            $output.value = files.map((file) => file.path).join(";");
+          })
+          .catch(() => {
+            console.log("[cancel]");
+            $output.value = "";
+          });
+      });
+
+      const preventDefault = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      };
+      window.addEventListener("dragenter", preventDefault);
+      window.addEventListener("dragover", preventDefault);
+      window.addEventListener("dragleave", preventDefault);
+      window.addEventListener("drop", preventDefault);
+      $output.addEventListener("drop", (e) => {
+        const files = [...e.dataTransfer.files];
+        console.log("[drop]", files);
+        $output.value = files.map((file) => file.path).join(";");
+      });
+    </script>
+  </body>
+</html>

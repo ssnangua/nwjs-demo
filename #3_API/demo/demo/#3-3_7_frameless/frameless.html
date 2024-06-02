@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>无边框窗口</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-flow: column;
+      }
+      .title-bar {
+        line-height: 30px;
+        padding: 5px 10px;
+        background-color: #000;
+        color: #fff;
+        display: flex;
+        flex-flow: row;
+        -webkit-app-region: drag;
+      }
+      .title-bar-text {
+        flex: auto;
+      }
+      .title-bar-controls {
+        -webkit-app-region: no-drag;
+      }
+      .window-body {
+        flex: auto;
+        padding: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="window">
+      <div class="title-bar">
+        <div class="title-bar-text">我是标题</div>
+        <div class="title-bar-controls">
+          <button onclick="window.close()">x</button>
+        </div>
+      </div>
+      <div class="window-body">我是内容</div>
+    </div>
+  </body>
+</html>

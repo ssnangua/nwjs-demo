@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Drop Demo</title>
+    <style>
+      #output > div {
+        padding: 5px 0;
+        border-bottom: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="output">拖放文件到窗口</div>
+    <script>
+      const fs = require("node:fs");
+      const preventDefault = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        return false;
+      };
+      window.addEventListener("dragenter", preventDefault);
+      window.addEventListener("dragover", preventDefault);
+      window.addEventListener("dragleave", preventDefault);
+      window.addEventListener("drop", preventDefault);
+      window.addEventListener("drop", (e) => {
+        const files = Array.from(e.dataTransfer.files)
+          .map((file) => {
+            file.isDirectory = fs.statSync(file.path).isDirectory();
+            return file;
+          })
+          .sort(
+            (a, b) =>
+              // 文件夹在前
+              b.isDirectory - a.isDirectory ||
+              // 文件名排序（含数值比较，如"2.*"会排在"10.*"前面）
+              a.path.localeCompare(b.path, undefined, { numeric: true })
+          );
+        console.log(files);
+        document.querySelector("#output").innerHTML = files
+          .map(
+            (file) => `<div title="${file.path}">${file.isDirectory ? "+ " : ""}${file.name}</div>`
+          )
+          .join("");
+      });
+    </script>
+  </body>
+</html>

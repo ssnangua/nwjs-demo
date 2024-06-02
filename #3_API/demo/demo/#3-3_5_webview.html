@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>&lt;webview&gt; Demo</title>
+    <style>
+      webview {
+        display: inline-block;
+        width: calc(50vw - 15px);
+        height: 120px;
+        border: 1px solid #ccc;
+      }
+    </style>
+  </head>
+  <body>
+    <webview src="http://127.0.0.1:5500/demo/inner.html?webview#[allownw]" allownw></webview>
+    <webview src="http://127.0.0.1:5500/demo/inner.html?webview"></webview>
+    <webview src="demo/inner.html?webview#[local][allownw]" partition="trusted" allownw></webview>
+    <webview src="demo/inner.html?webview#[local]" partition="trusted"></webview>
+    <webview src="about:blank" partition="trusted"></webview>
+    <script>
+      const local = require("node:path").join(nw.App.startPath, "demo/demo/inner.html");
+      document.querySelector('[src="about:blank"]').src = local + "?webview#[local]";
+    </script>
+  </body>
+</html>

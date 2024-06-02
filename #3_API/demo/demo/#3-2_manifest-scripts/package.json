@@ -1,0 +1,9 @@
+{
+  "name": "script-demo",
+  "version": "1.0.0",
+  "main": "main.js",
+  "bg-script": "bg-script.js",
+  "node-main": "node-main.js",
+  "inject_js_start": "inject_js_start.js",
+  "inject_js_end": "inject_js_end.js"
+}

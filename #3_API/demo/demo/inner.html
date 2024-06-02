@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>内嵌页面</title>
+    <style>
+      html {
+        overflow: hidden;
+        font: 13px "Helvetica Neue", "Lucida Grande", "Arial";
+      }
+      * {
+        white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+    <script>
+      document.write(`<h2>${location.hash || "&nbsp;"}</h2>`);
+      document.write(`<p><b>nw:</b> ${window.process?.versions.nw}</p>`);
+      document.write(
+        location.search === "?iframe"
+          ? `<p><b>top:</b> ${decodeURIComponent(top.location.pathname)}</p>`
+          : `<p><b>origin:</b> ${top.location.origin}</p>`
+      );
+    </script>
+  </body>
+</html>

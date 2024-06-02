@@ -1,0 +1,7 @@
+{
+  "name": "frameless-demo",
+  "main": "frameless.html",
+  "window": {
+    "frame": false
+  }
+}

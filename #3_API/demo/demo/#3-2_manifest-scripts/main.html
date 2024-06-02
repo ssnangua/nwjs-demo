@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>main.html</title>
+    <script>
+      require("log")("main.html");
+    </script>
+    <style>
+      code {
+        display: inline-block;
+        background: #f2f1f1;
+        border-radius: 4px;
+        padding: 5px 10px;
+        font-weight: bold;
+      }
+      li + li {
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    配置文件 <code>package.json</code> 中几个脚本字段的执行顺序：
+    <ul>
+      <li><code>node-main</code></li>
+      <li><code>main</code></li>
+      <li><code>bg-script</code></li>
+      <li><code>inject_js_start</code></li>
+      <li><code>inject_js_end</code></li>
+    </ul>
+  </body>
+</html>
