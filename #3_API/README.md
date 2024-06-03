@@ -1,8 +1,8 @@
 # NW.js API 示例
 
 - **#3-2_manifest-scripts** - 配置文件 `package.json` 中几个脚本字段的执行顺序
-- **#3-3_1_input.html** - `<input type="file">` 实现文件选择框
-- **#3-3_2_drop.html** - 文件拖放
+- **#3-3_1_input-file.html** - `<input type="file">` 实现文件选择框
+- **#3-3_2_drop-readdir.html** - 文件拖放和读取文件夹
 - **#3-3_3_filePicker.html** - 文件选择框接口封装
 - **#3-3_4_iframe.html** - `<iframe nwdisable nwfaketop>` 内嵌页面
 - **#3-3_5_webview.html** - `<webview partition="trusted" allownw>` 内嵌页面
