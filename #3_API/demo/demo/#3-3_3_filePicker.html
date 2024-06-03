@@ -4,33 +4,227 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>File Picker Demo</title>
+    <style>
+      body {
+        font-size: 14px;
+      }
+      section {
+        display: flex;
+        flex-flow: row wrap;
+      }
+      section + section {
+        border-top: 1px solid #ccc;
+      }
+      section > section {
+        width: 100%;
+        padding: 10px;
+        padding-top: 0;
+      }
+      p {
+        padding: 0 10px;
+        align-content: center;
+      }
+      p + p {
+        border-left: 1px solid #ccc;
+      }
+      input[type="text"] {
+        outline: none;
+        width: 80px;
+      }
+      #selected {
+        cursor: default;
+      }
+      #selected.dragenter {
+        background-color: #67c23a;
+      }
+    </style>
   </head>
   <body>
-    <input id="output" type="text" placeholder="拖放文件到这里" readonly style="width: 400px" />
-    <button id="button">打开</button>
+    <!-- 选择文件 -->
+    <section>
+      <p>
+        <button id="openFile">
+          <ruby>选择文件<rt>showOpenFilePicker</rt></ruby>
+        </button>
+      </p>
+      <p>
+        <input id="openMultiple" type="checkbox" checked />
+        <label for="openMultiple">
+          <ruby>多选<rt>multiple</rt></ruby>
+        </label>
+      </p>
+      <p>
+        <label for="openAccept">
+          <ruby>类型<rt>accept</rt></ruby>
+        </label>
+        <input id="openAccept" type="text" value=".txt" />
+      </p>
+      <p>
+        <label>
+          <ruby>初始目录<rt>startIn</rt></ruby>
+        </label>
+        <start-in id="openStartIn" value="downloads"></start-in>
+      </p>
+    </section>
+
+    <!-- 保存文件 -->
+    <section>
+      <p>
+        <button id="saveFile">
+          <ruby>保存文件<rt>showSaveFilePicker</rt></ruby>
+        </button>
+      </p>
+      <p>
+        <label for="suggestedName">
+          <ruby>文件名<rt>filename</rt></ruby>
+        </label>
+        <input id="suggestedName" type="text" value="out.txt" />
+      </p>
+      <p>
+        <label for="saveAccept">
+          <ruby>类型<rt>accept</rt></ruby>
+        </label>
+        <input id="saveAccept" type="text" value=".txt" />
+      </p>
+      <p>
+        <label>
+          <ruby>初始目录<rt>startIn</rt></ruby>
+        </label>
+        <start-in id="saveStartIn" value="downloads"></start-in>
+      </p>
+    </section>
+
+    <!-- 选择目录 -->
+    <section>
+      <p>
+        <button id="openDirectory">
+          <ruby>选择目录<rt>showDirectoryPicker</rt></ruby>
+        </button>
+      </p>
+      <p>
+        <label for="openDirectoryDesc">
+          <ruby>标题<rt>openDirectoryDesc</rt></ruby>
+        </label>
+        <input id="openDirectoryDesc" type="text" value="选择目录" />
+      </p>
+      <p>
+        <label>
+          <ruby>初始目录<rt>startIn</rt></ruby>
+        </label>
+        <start-in id="openDirectoryStartIn" value="downloads"></start-in>
+      </p>
+    </section>
+
+    <!-- 文件选择组件 -->
+    <section>
+      <p><label>文件选择组件</label></p>
+      <p>
+        <input
+          type="radio"
+          id="showOpenFilePicker"
+          name="type"
+          value="showOpenFilePicker"
+          checked
+        />
+        <label for="showOpenFilePicker">选择文件</label>
+        <input type="radio" id="showSaveFilePicker" name="type" value="showSaveFilePicker" />
+        <label for="showSaveFilePicker">保存文件</label>
+        <input type="radio" id="showDirectoryPicker" name="type" value="showDirectoryPicker" />
+        <label for="showDirectoryPicker">选择目录</label>
+      </p>
+      <section>
+        <input
+          id="selected"
+          type="text"
+          placeholder="拖放文件或目录到这里"
+          readonly
+          style="width: 400px"
+        />
+        <button id="button">浏览...</button>
+      </section>
+    </section>
 
     <script type="module">
       import filePicker from "./filePicker.js";
+      const fs = require("fs");
 
-      const $output = document.querySelector("#output");
-      const $button = document.querySelector("#button");
+      const $ = (s) => document.querySelector(s);
+      const $$ = (s) => document.querySelectorAll(s);
 
-      $button.addEventListener("click", () => {
+      // 选择文件
+      $("#openFile").addEventListener("click", () => {
         filePicker
-          .showOpenDialog({
-            multiple: true,
-            // accept: "image/*,.txt",
-            // openDirectory: false,
-            // title: "选择文件夹",
-            // defaultPath: process.env.USERPROFILE + "\\Downloads",
+          .showOpenFilePicker({
+            multiple: $("#openMultiple").checked,
+            accept: $("#openAccept").value,
+            startIn: $("#openStartIn").value,
           })
           .then((files) => {
-            console.log("[change]", files);
-            $output.value = files.map((file) => file.path).join(";");
+            alert(files.map((file) => file.path).join("\n"));
+          })
+          .catch(() => {});
+      });
+
+      // 保存文件
+      $("#saveFile").addEventListener("click", () => {
+        filePicker
+          .showSaveFilePicker({
+            suggestedName: $("#suggestedName").value,
+            accept: $("#saveAccept").value,
+            startIn: $("#saveStartIn").value,
+          })
+          .then((files) => {
+            alert(files.map((file) => file.path).join("\n"));
+          })
+          .catch(() => {});
+      });
+
+      // 选择目录
+      $("#openDirectory").addEventListener("click", () => {
+        filePicker
+          .showDirectoryPicker({
+            openDirectoryDesc: $("#openDirectoryDesc").value,
+            startIn: $("#openDirectoryStartIn").value,
+          })
+          .then((files) => {
+            alert(files.map((file) => file.path).join("\n"));
+          })
+          .catch(() => {});
+      });
+
+      // 文件选择组件
+      const $selected = $("#selected");
+      function getType() {
+        return [...$$('[name="type"]')].find((radio) => radio.checked).value;
+      }
+      $("#button").addEventListener("click", () => {
+        const type = getType();
+        let dialog;
+        if (type === "showOpenFilePicker") {
+          dialog = filePicker.showOpenFilePicker({
+            multiple: $("#openMultiple").checked,
+            accept: $("#openAccept").value,
+            startIn: $("#openStartIn").value,
+          });
+        } else if (type === "showSaveFilePicker") {
+          dialog = filePicker.showSaveFilePicker({
+            suggestedName: $("#suggestedName").value,
+            accept: $("#saveAccept").value,
+            startIn: $("#saveStartIn").value,
+          });
+        } else if (type === "showDirectoryPicker") {
+          dialog = filePicker.showDirectoryPicker({
+            openDirectoryDesc: $("#openDirectoryDesc").value,
+            startIn: $("#openDirectoryStartIn").value,
+          });
+        }
+        dialog
+          .then((files) => {
+            $selected.value = files.map((file) => file.path).join(";");
+            alert("选择：\n" + files.map((file) => file.path).join("\n"));
           })
           .catch(() => {
-            console.log("[cancel]");
-            $output.value = "";
+            $selected.value = "";
           });
       });
 
@@ -43,11 +237,63 @@
       window.addEventListener("dragover", preventDefault);
       window.addEventListener("dragleave", preventDefault);
       window.addEventListener("drop", preventDefault);
-      $output.addEventListener("drop", (e) => {
-        const files = [...e.dataTransfer.files];
-        console.log("[drop]", files);
-        $output.value = files.map((file) => file.path).join(";");
+      $selected.addEventListener("dragenter", () => $selected.classList.add("dragenter"));
+      $selected.addEventListener("dragleave", () => $selected.classList.remove("dragenter"));
+      $selected.addEventListener("drop", (e) => {
+        $selected.classList.remove("dragenter");
+        const type = getType();
+        const isOpenFile = type === "showOpenFilePicker";
+        const isSaveFile = type === "showSaveFilePicker";
+        const isDirectory = type === "showDirectoryPicker";
+        const accept = isDirectory ? "" : $(isOpenFile ? "#openAccept" : "#saveAccept").value;
+        const acceptPattern = new RegExp(
+          //注：只支持“.jpg,.png”格式，不支持“image/*”格式
+          accept.replace(/\s/g, "").replace(/\./g, "\\.").replace(/,/g, "|") + "$",
+          "i"
+        );
+        let files = [...e.dataTransfer.files].filter((file) => {
+          // 文件或目录
+          if (isDirectory && fs.statSync(file.path).isFile()) return false;
+          // 文件类型
+          if (!isDirectory && !acceptPattern.test(file.name)) return false;
+          return true;
+        });
+        // 单选或多选
+        if (!isOpenFile || !$("#openMultiple").checked) files = files.slice(0, 1);
+        $selected.value = files.map((file) => file.path).join(";");
+        alert("拖放：\n" + files.map((file) => file.path).join("\n"));
       });
+      $selected.addEventListener("click", () => {
+        const files = $selected.value.split(";");
+        alert(files.join("\n"));
+      });
+    </script>
+
+    <!-- start-in 组件 -->
+    <script>
+      class StartIn extends HTMLElement {
+        #select;
+        constructor() {
+          super();
+          this.attachShadow({ mode: "open" });
+          this.shadowRoot.innerHTML =
+            `<select>` +
+            ["desktop", "documents", "downloads", "music", "pictures", "videos"]
+              .map((v) => `<option value="${v}">${v}</option>`)
+              .join("") +
+            `</select>`;
+          this.#select = this.shadowRoot.querySelector("select");
+          this.#select.value = this.value;
+          this.#select.onchange = () => (this.value = this.#select.value);
+        }
+        get value() {
+          return this.getAttribute("value") || "";
+        }
+        set value(value) {
+          this.setAttribute("value", value);
+        }
+      }
+      customElements.define("start-in", StartIn);
     </script>
   </body>
 </html>
