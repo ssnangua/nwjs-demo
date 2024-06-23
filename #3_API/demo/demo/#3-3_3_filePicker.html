@@ -8,23 +8,24 @@
       body {
         font-size: 14px;
       }
-      section {
+      group {
         display: flex;
         flex-flow: row wrap;
       }
-      section + section {
+      group + group {
         border-top: 1px solid #ccc;
       }
-      section > section {
+      line {
         width: 100%;
         padding: 10px;
         padding-top: 0;
       }
-      p {
+      part {
         padding: 0 10px;
+        margin: 10px 0;
         align-content: center;
       }
-      p + p {
+      part + part {
         border-left: 1px solid #ccc;
       }
       input[type="text"] {
@@ -41,84 +42,84 @@
   </head>
   <body>
     <!-- 选择文件 -->
-    <section>
-      <p>
+    <group>
+      <part>
         <button id="openFile">
           <ruby>选择文件<rt>showOpenFilePicker</rt></ruby>
         </button>
-      </p>
-      <p>
+      </part>
+      <part>
         <input id="openMultiple" type="checkbox" checked />
         <label for="openMultiple">
           <ruby>多选<rt>multiple</rt></ruby>
         </label>
-      </p>
-      <p>
+      </part>
+      <part>
         <label for="openAccept">
           <ruby>类型<rt>accept</rt></ruby>
         </label>
         <input id="openAccept" type="text" value=".txt" />
-      </p>
-      <p>
+      </part>
+      <part>
         <label>
           <ruby>初始目录<rt>startIn</rt></ruby>
         </label>
         <start-in id="openStartIn" value="downloads"></start-in>
-      </p>
-    </section>
+      </part>
+    </group>
 
     <!-- 保存文件 -->
-    <section>
-      <p>
+    <group>
+      <part>
         <button id="saveFile">
           <ruby>保存文件<rt>showSaveFilePicker</rt></ruby>
         </button>
-      </p>
-      <p>
+      </part>
+      <part>
         <label for="suggestedName">
-          <ruby>文件名<rt>filename</rt></ruby>
+          <ruby>文件名<rt>suggestedName</rt></ruby>
         </label>
         <input id="suggestedName" type="text" value="out.txt" />
-      </p>
-      <p>
+      </part>
+      <part>
         <label for="saveAccept">
           <ruby>类型<rt>accept</rt></ruby>
         </label>
         <input id="saveAccept" type="text" value=".txt" />
-      </p>
-      <p>
+      </part>
+      <part>
         <label>
           <ruby>初始目录<rt>startIn</rt></ruby>
         </label>
         <start-in id="saveStartIn" value="downloads"></start-in>
-      </p>
-    </section>
+      </part>
+    </group>
 
     <!-- 选择目录 -->
-    <section>
-      <p>
+    <group>
+      <part>
         <button id="openDirectory">
           <ruby>选择目录<rt>showDirectoryPicker</rt></ruby>
         </button>
-      </p>
-      <p>
+      </part>
+      <part>
         <label for="openDirectoryDesc">
           <ruby>标题<rt>openDirectoryDesc</rt></ruby>
         </label>
         <input id="openDirectoryDesc" type="text" value="选择目录" />
-      </p>
-      <p>
+      </part>
+      <part>
         <label>
           <ruby>初始目录<rt>startIn</rt></ruby>
         </label>
         <start-in id="openDirectoryStartIn" value="downloads"></start-in>
-      </p>
-    </section>
+      </part>
+    </group>
 
     <!-- 文件选择组件 -->
-    <section>
-      <p><label>文件选择组件</label></p>
-      <p>
+    <group>
+      <part><label>文件选择组件</label></part>
+      <part>
         <input
           type="radio"
           id="showOpenFilePicker"
@@ -131,8 +132,8 @@
         <label for="showSaveFilePicker">保存文件</label>
         <input type="radio" id="showDirectoryPicker" name="type" value="showDirectoryPicker" />
         <label for="showDirectoryPicker">选择目录</label>
-      </p>
-      <section>
+      </part>
+      <line>
         <input
           id="selected"
           type="text"
@@ -141,8 +142,8 @@
           style="width: 400px"
         />
         <button id="button">浏览...</button>
-      </section>
-    </section>
+      </line>
+    </group>
 
     <script type="module">
       import filePicker from "./filePicker.js";

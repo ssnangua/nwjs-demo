@@ -23,7 +23,7 @@ export function showFilePicker({
   openDirectory = false,
   openDirectoryDesc = "",
   startIn = "",
-}) {
+} = {}) {
   return new Promise((resolve, reject) => {
     setAttribute("nwsaveas", type === "save" ? suggestedName : false);
     setAttribute("multiple", multiple);

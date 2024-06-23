@@ -68,21 +68,45 @@
     <script>
       const fs = require("node:fs");
       const { exec } = require("node:child_process");
-      document.querySelector("ul").innerHTML = fs
-        .readdirSync("./demo")
-        .filter((file) => /^#\d+/i.test(file))
-        .map(
-          (file) =>
-            `<li>` +
-            (fs.statSync("./demo/" + file).isDirectory()
-              ? `<a class="directory" href="javascript:;" onclick="run('./demo/${file}')">${file}</a>`
-              : `<a class="file" href="./demo/${encodeURIComponent(
-                  file
-                )}" target="_blank">${file}</a>`) +
-            `</li>`
-        )
-        .join("");
-      window.run = (dir) => exec(`"${process.execPath}" "${dir}"`, () => {});
+      document.querySelector("ul").innerHTML =
+        `<li>
+          <a class="directory" href="javascript:;"
+            onclick="openWindow('./demo/api/api.html')"
+          >API Example</a>
+        </li>` +
+        fs
+          .readdirSync("./demo")
+          .filter((file) => /^#\d+/i.test(file))
+          .map(
+            (file) =>
+              `<li>` +
+              (fs.statSync("./demo/" + file).isDirectory()
+                ? `<a class="directory" href="javascript:;"
+                onclick="runApp('./demo/${file}')">${file}</a>`
+                : `<a class="file" href="javascript:;"
+                onclick="openWindow('./demo/${encodeURIComponent(file)}')">${file}</a>`) +
+              `</li>`
+          )
+          .join("");
+      window.runApp = (dir) => exec(`"${process.execPath}" "${dir}"`, () => {});
+      window.openWindow = (url) => nw.Window.open(url, { new_instance: true, position: "center" });
+
+      // 兜底`close`事件Bug：https://github.com/nwjs/nw.js/issues/7808
+      chrome.tabs.onRemoved.addListener(() => {
+        nw.Window.getAll((list) => {
+          list.forEach((win) => {
+            if (win.cWindow.tabs.length === 0) {
+              win.close(true);
+            }
+          });
+        });
+      });
+    </script>
+
+    <script>
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "F5") nw.Window.get().reload();
+      });
     </script>
   </body>
 </html>

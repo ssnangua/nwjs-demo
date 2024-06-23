@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Window.open Demo</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <style>
+      html,
+      body {
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-flow: row nowrap;
+        overflow: hidden;
+        font-size: 14px;
+      }
+      .main,
+      .code,
+      pre {
+        flex: auto;
+        overflow: hidden;
+        display: flex;
+        flex-flow: column;
+      }
+      .controls {
+        border-bottom: 1px solid #ccc;
+        padding: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      pre {
+        margin: 0;
+      }
+      code {
+        flex: auto;
+        overflow: auto;
+      }
+      .options {
+        flex-shrink: 0;
+        width: 370px;
+        display: flex;
+        flex-flow: row wrap;
+        overflow: auto;
+        padding: 10px;
+        border-left: 1px solid #ccc;
+      }
+      .option {
+        padding: 10px;
+        margin: 4px;
+        align-content: center;
+        background-color: #f2f2f2;
+        border-radius: 4px;
+      }
+      .br {
+        width: 100%;
+        height: 1px;
+      }
+      input[type="text"],
+      input[type="number"] {
+        outline: none;
+        width: 80px;
+      }
+      label + input,
+      label + select {
+        margin-left: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="main">
+      <div class="controls">
+        <label>代码：</label>
+        <button id="open">打开新窗口</button>
+      </div>
+      <div class="code">
+        <pre><code id="code" class="language-javascript"></code></pre>
+      </div>
+    </div>
+    <div class="options"></div>
+    <script>
+      function complieOption({ name, desc, type, accept, def }, group) {
+        if (type === "br") return `<div class="br"></div>`;
+        const label = `<label for="${group}_${name}"><ruby>${desc}<rt>${name}</rt></ruby></label>`;
+        let content = "";
+        if (type === "boolean") {
+          content =
+            `<input id="${group}_${name}" type="checkbox" ${def ? "checked" : ""} />` + label;
+        } else if (type === "string") {
+          content = label + `<input id="${group}_${name}" type="text" value="${def}" />`;
+        } else if (type === "number") {
+          content =
+            label + `<input id="${group}_${name}" type="number" min="0" step="1" value="${def}" />`;
+        } else if (type === "file") {
+          content =
+            label + `<input id="${group}_${name}" type="file" accept="${accept}" value="${def}" />`;
+        } else if (Array.isArray(type)) {
+          content =
+            label +
+            `<select id="${group}_${name}">` +
+            type.map(({ value, desc }) => `<option value="${value}">${desc}</option>`).join("") +
+            `</select>`;
+        }
+        return `<div class="option">${content}</div>`;
+      }
+
+      function getOptionValue({ name, type }, group) {
+        const el = document.querySelector(`#${group}_${name}`);
+        if (type === "boolean") return el.checked;
+        if (type === "string" || type === "file" || Array.isArray(type)) return el.value;
+        if (type === "number") return +el.value;
+      }
+
+      const openOptions = [
+        { name: "id", desc: "窗口ID", type: "string", def: "" },
+        { type: "br" },
+        { name: "title", desc: "默认标题", type: "string", def: "" },
+        { type: "br" },
+        { name: "icon", desc: "图标", type: "file", accept: ".png", def: "" },
+        { type: "br" },
+        { name: "width", desc: "宽度", type: "number", def: 0 },
+        { name: "height", desc: "高度", type: "number", def: 0 },
+        { type: "br" },
+        { name: "resizable", desc: "可调整大小", type: "boolean", def: true },
+        { type: "br" },
+        { name: "min_width", desc: "最小宽度", type: "number", def: 0 },
+        { name: "min_height", desc: "最小高度", type: "number", def: 0 },
+        { type: "br" },
+        { name: "max_width", desc: "最大宽度", type: "number", def: 0 },
+        { name: "max_height", desc: "最大高度", type: "number", def: 0 },
+        { type: "br" },
+        {
+          name: "position",
+          desc: "位置",
+          type: [
+            { value: "null", desc: "默认 (null)" },
+            { value: "center", desc: "屏幕居中 (center)" },
+            { value: "mouse", desc: "鼠标位置 (mouse)" },
+          ],
+          def: "null",
+        },
+        { type: "br" },
+        { name: "show", desc: "显示窗口", type: "boolean", def: true },
+        { type: "br" },
+        { name: "show_in_taskbar", desc: "在任务栏中显示", type: "boolean", def: true },
+        { type: "br" },
+        { name: "always_on_top", desc: "始终置顶", type: "boolean", def: false },
+        { type: "br" },
+        { name: "frame", desc: "显示外框", type: "boolean", def: true },
+        { name: "transparent", desc: "窗口透明", type: "boolean", def: false },
+        { type: "br" },
+        { name: "fullscreen", desc: "全屏模式", type: "boolean", def: false },
+        { name: "kiosk", desc: "Kiosk模式", type: "boolean", def: false },
+        { type: "br" },
+        { name: "new_instance", desc: "独立渲染进程", type: "boolean", def: false },
+        { name: "mixed_context", desc: "混合环境模式", type: "boolean", def: false },
+        { type: "br" },
+        { name: "inject_js_start", desc: "注入脚本", type: "file", accept: ".js", def: "" },
+        { type: "br" },
+        { name: "inject_js_end", desc: "注入脚本", type: "file", accept: ".js", def: "" },
+      ];
+
+      const defValueMap = {};
+      const $options = document.querySelector(".options");
+      $options.innerHTML = openOptions
+        .map((option) => {
+          if (option.name) defValueMap[option.name] = option.def;
+          return complieOption(option, "open");
+        })
+        .join("");
+      $options.querySelectorAll("input,select").forEach((el) => {
+        el.addEventListener("change", updateCode);
+      });
+
+      let options;
+      const $code = document.querySelector("#code");
+      function updateCode() {
+        options = {};
+        openOptions.forEach((option) => {
+          if (option.name) {
+            const value = getOptionValue(option, "open");
+            if (value !== defValueMap[option.name]) {
+              options[option.name] = value;
+            }
+          }
+        });
+        $code.textContent =
+          `nw.Window.open("demo/blank.html"` +
+          (Object.keys(options).length > 0 ? `, ` + JSON.stringify(options, null, 4) : "") +
+          ");";
+        $code.dataset.highlighted = "";
+        hljs.highlightAll();
+      }
+      updateCode();
+
+      document.querySelector("#open").addEventListener("click", () => {
+        nw.Window.open("demo/blank.html", options);
+      });
+    </script>
+  </body>
+</html>

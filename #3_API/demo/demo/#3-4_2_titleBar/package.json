@@ -1,0 +1,7 @@
+{
+  "name": "title-bar-demo",
+  "main": "titleBar.html",
+  "window": {
+    "frame": false
+  }
+}

@@ -33,11 +33,14 @@
       #title {
         flex: auto;
       }
-      #url {
+      #address {
         flex: auto;
       }
       .find-bar {
         justify-content: flex-end;
+      }
+      #findResults {
+        padding: 0 10px;
       }
       .content {
         flex: auto;
@@ -51,199 +54,222 @@
         flex: 1;
         border-left: 1px solid #ccc;
       }
-      .hide {
-        display: none;
+    </style>
+    <!-- prettier-ignore -->
+    <style>
+      .hide { display: none; }
+      .disabled { opacity: 0.5; pointer-events: none; }
+      body {
+        &.loading {
+          & [data-name="reload"] { display: none; }
+          & [data-name="stop"] { display: inline-block; }
+        }
+        &.can-go-back [data-name="back"],
+        &.can-go-forward [data-name="forward"],
+        &.find-matches :is([data-name="findPrev"], [data-name="findNext"])
+          { opacity: 1; pointer-events: auto; }
+        &.show-find-bar .find-bar { display: flex; }
+        &.show-dev-tools #devTools { display: block; }
       }
     </style>
   </head>
-  <body>
+  <body class="">
     <div class="title-bar">
-      <img id="favicon" src="" />
-      <label id="title"></label>
+      <img id="favicon" src="#" />
+      <label id="title">标题</label>
     </div>
     <div class="address-bar">
-      <button id="back">返回</button>
-      <button id="forward">前进</button>
-      <button id="reload">刷新</button>
-      <button id="stop">停止</button>
-      <input id="url" type="text" />
-      <button id="toggleDevTools">开发者工具</button>
+      <button data-name="back" class="disabled">返回</button>
+      <button data-name="forward" class="disabled">前进</button>
+      <button data-name="reload">刷新</button>
+      <button data-name="stop" class="hide">停止</button>
+      <input id="address" type="text" />
+      <button data-name="toggleFindBar">查找</button>
+      <button data-name="toggleDevTools">开发者工具</button>
     </div>
-    <div class="find-bar">
+    <div class="find-bar hide">
       <div>查找：</div>
       <input id="searchText" type="text" />
-      <div id="matches">0/0</div>
-      <button id="findPrev">上一个</button>
-      <button id="findNext">下一个</button>
+      <div id="findResults">0/0</div>
+      <button data-name="findPrev" class="disabled">上一个</button>
+      <button data-name="findNext" class="disabled">下一个</button>
+      <button data-name="stopFinding">结束</button>
     </div>
     <div class="content">
       <webview id="webview" src="https://www.baidu.com"></webview>
-      <webview id="devTools" src="about:blank" class=""></webview>
+      <webview id="devTools" src="about:blank" class="hide"></webview>
     </div>
     <script>
-      const els = {};
-      document.querySelectorAll("[id]").forEach((el) => (els["$" + el.id] = el));
+      const bodyClass = document.body.classList;
 
-      with (els) {
-        // 在另一个webview中加载开发者工具
-        $devTools.addEventListener("contentload", () => {
-          $webview.showDevTools(true, $devTools);
-        });
+      // const observer = new MutationObserver(() => {
+      //   address.value = webview.src;
+      // });
+      // observer.observe(webview, { attributes: true });
 
-        $back.addEventListener("click", () => $webview.back());
-        $forward.addEventListener("click", () => $webview.forward());
-        $reload.addEventListener("click", () => $webview.reload());
-        $stop.addEventListener("click", () => $webview.stop());
-        $url.addEventListener("keydown", (e) => {
-          if (!e.repeat && e.code === "Enter") {
-            let url = $url.value.trim();
-            if (!url.startsWith("http")) url = "https://" + url;
-            $webview.src = url;
+      const browser = {
+        back() {
+          webview.back(); // 返回
+        },
+        forward() {
+          webview.forward(); // 前进
+        },
+        reload() {
+          webview.reload(); // 刷新
+        },
+        stop() {
+          webview.stop(); // 停止
+        },
+        navigate(url) {
+          if (url === "about:blank") {
+            // 自定义空白页
+            // webview.src = "blank.html";
+
+            // 加载数据网址
+            webview.loadDataWithBaseUrl(
+              `data:text/html;charset=UTF-8,<html>
+                <head><title>空白页</title></head>
+                <body>啥都莫得</body>
+              </html>`, // 数据网址
+              url, // 基础网址
+              url // 虚拟网址
+            );
+          } else {
+            // 自动添加协议头
+            if (!/^http(s?):\/\//i.test(url)) url = "https://" + url;
+            webview.src = url;
           }
-        });
-        $toggleDevTools.addEventListener("click", () => {
-          const isShow = !$devTools.classList.contains("hide");
-          $devTools.classList[isShow ? "add" : "remove"]("hide");
-        });
-
-        function find(backward) {
-          $webview.find($searchText.value.trim(), { backward }, (results) => {
-            $matches.textContent = `${results.activeMatchOrdinal}/${results.numberOfMatches}`;
+        },
+        toggleFindBar() {
+          const isShow = bodyClass.toggle("show-find-bar");
+          if (isShow) {
+            webview.executeScript(
+              // 获取内嵌页面选中的文本
+              { code: `window.getSelection().toString()` },
+              ([selectionText]) => {
+                if (selectionText) searchText.value = selectionText;
+                // 查找输入框获得焦点并选中内容
+                searchText.focus();
+                searchText.selectionStart = 0;
+                searchText.selectionEnd = searchText.value.length;
+                // 如果查找输入框有内容，自动执行一次查找
+                if (searchText.value) this.find(searchText.value, false);
+              }
+            );
+          } else {
+            webview.stopFinding();
+          }
+        },
+        find(searchText, backward = false) {
+          webview.find(searchText, { backward }, (results) => {
+            const { numberOfMatches, activeMatchOrdinal } = results;
+            findResults.textContent = activeMatchOrdinal + "/" + numberOfMatches;
+            bodyClass.toggle("find-matches", numberOfMatches > 0);
           });
-        }
-        $findPrev.addEventListener("click", () => find(true));
-        $findNext.addEventListener("click", () => find(false));
-
-        let isLoaded = false;
-        function updateAddressBar() {
-          $back.disabled = !$webview.canGoBack();
-          $forward.disabled = !$webview.canGoForward();
-          $reload.classList[isLoaded ? "remove" : "add"]("hide");
-          $stop.classList[isLoaded ? "add" : "remove"]("hide");
-          $url.value = $webview.src;
-        }
-
-        // 注入css样式和js脚本
-        $webview.addContentScripts([
-          {
-            name: "nw_inject",
-            matches: ["<all_urls>"], // 导航到符合匹配规则的URL时注入
-            css: {
-              code: `
-                ::-webkit-scrollbar {
-                  width: 12px;
-                  height: 12px;
-                }
-                ::-webkit-scrollbar-track {
-                  background-color: #fcfcfc;
-                }
-                ::-webkit-scrollbar-thumb {
-                  background-color: #8b8b8b;
-                  border-radius: 6px;
-                  border: 2px solid #fcfcfc;
-                }
-                ::-webkit-scrollbar-thumb:hover {
-                  background-color: #636363;
-                }
-              `,
-              // files: ["webview_inject.css"],
-            },
-            // world: "MAIN", // 脚本注入到真实环境，NW.js貌似不支持该特性
-            // 不支持注入到真实环境，所以在contentload后通过executeScript来注入
-            js: {
-              // code: 'console.log('test')',
-              // files: ["webview_inject.js"],
-            },
-            run_at: "document_start", // 在DOM加载之前注入
-            all_frames: true,
-          },
-        ]);
-
-        // 文档发生导航
-        $webview.addEventListener("loadcommit", (e) => {
-          // 只处理最外层框架
-          if (e.isTopLevel) {
-            isLoaded = false;
-            updateAddressBar();
+        },
+        findPrev() {
+          this.find(searchText.value, true);
+        },
+        findNext() {
+          this.find(searchText.value, false);
+        },
+        stopFinding() {
+          webview.stopFinding();
+          bodyClass.remove("show-find-bar");
+        },
+        toggleDevTools() {
+          const isShow = bodyClass.toggle("show-dev-tools");
+          if (isShow) {
+            webview.showDevTools(true, devTools);
+          } else {
+            webview.showDevTools(false);
+            devTools.src = "about:blank";
           }
+        },
+      };
+
+      // 按钮点击
+      document.querySelectorAll("button[data-name]").forEach((el) => {
+        el.addEventListener("click", () => {
+          browser[el.dataset.name]?.();
         });
+      });
 
-        // 开始加载
-        $webview.addEventListener("loadstart", (e) => {});
+      // 地址栏回车
+      address.addEventListener("keydown", (e) => {
+        if (!e.repeat && e.key === "Enter") {
+          browser.navigate(address.value);
+        }
+      });
 
-        // 文档加载完成（文档内部的导航“不”会触发）
-        $webview.addEventListener("contentload", (e) => {});
+      // 查找输入框输入
+      searchText.addEventListener("input", (e) => {
+        browser.find(searchText.value, false);
+      });
 
-        // 文档加载完成（文档内部的导航“也”会触发）
-        $webview.addEventListener("loadstop", (e) => {
-          isLoaded = true;
-          updateAddressBar();
-          // 在webview中执行js脚本
-          $webview.executeScript(
-            {
-              // 获取基本信息（图标、标题、url）
-              code: `[
-                {
-                  favicon: document.querySelector('link[rel="shortcut icon"],link[rel="icon"]')?.href
-                        || location.origin + "/favicon.ico",
-                  title: document.title,
-                  url: location.href,
-                }
-              ]`,
-            },
-            ([[info]]) => {
-              // console.log(info);
-              $favicon.src = info.favicon;
-              $title.textContent = info.title;
-            }
-          );
+      const webviewEvents = {
+        // 发生文档加载
+        loadcommit({ isTopLevel, url }) {
+          if (isTopLevel) {
+            address.value = webview.src;
+            bodyClass.add("loading");
+            bodyClass.toggle("can-go-back", webview.canGoBack());
+            bodyClass.toggle("can-go-forward", webview.canGoForward());
+          }
+        },
+        // 文档加载完成
+        loadstop() {
+          bodyClass.remove("loading");
+
+          // webview.executeScript(
+          //   {
+          //     code: `// 返回页面的图标、标题、URL
+          //       ({
+          //         favicon: document.querySelector('link[rel="shortcut icon"],link[rel="icon"]')?.href || location.origin + "/favicon.ico",
+          //         title: document.title,
+          //         url: location.href,
+          //       })`,
+          //     // file: "myscript.js",
+          //   },
+          //   ([data]) => {
+          //     // console.log(data);
+          //     favicon.src = data.favicon;
+          //     title.textContent = data.title;
+          //   }
+          // );
 
           // 构建消息通道
-          $webview.executeScript({
-            // mainWorld: true, // 如果需要访问webview的真实上下文
+          webview.executeScript({
             code: `
-              let source;
-              // 侦听来自应用的消息
-              window.addEventListener("message", (event) => {
-                if (event.data === "nw_init") {
-                  console.log(event.data);
-                  // 缓存外层窗口引用
-                  source = event.source;
-                  // 向外层窗口发送消息
-                  source.postMessage("webview_inited", "*");
-                }
-              });
-            `,
+                let source;
+                // 侦听来自应用的消息
+                window.addEventListener("message", (event) => {
+                  if (event.data === "Hi, webview!") {
+                    // 缓存应用窗口 window 引用
+                    source = event.source;
+                    // 内嵌页面 → 应用（回传消息）
+                    event.source.postMessage({
+                      type: "webview_info",
+                      data: {
+                        favicon: document.querySelector('link[rel="shortcut icon"],link[rel="icon"]')?.href || location.origin + "/favicon.ico",
+                        title: document.title,
+                        url: location.href,
+                      }
+                    }, "*");
+                  }
+                });
+              `,
           });
-          // 发送初始化消息（主要是为了把外层窗口的引用传给WebView）
-          $webview.contentWindow.postMessage("nw_init", "*");
-        });
 
-        // 侦听（来自webview的）消息
-        window.addEventListener("message", (event) => {
-          console.log(event.data);
-        });
-
-        // 取消加载或加载失败
-        $webview.addEventListener("loadabort", (e) => {
-          isLoaded = true;
-          updateAddressBar();
-          e.preventDefault(); // 阻止默认行为，否则会在控制台输出一条警告信息
-        });
-
-        // 打开窗口
-        $webview.addEventListener("newwindow", (e) => {
-          // 在浏览器中，一般是打开一个新标签页或窗口
-          // 因为本示例只有一个webview，就直接在该webview中加载了
-          $webview.src = e.targetUrl;
-          e.preventDefault(); // 阻止默认行为，否则会在控制台输出一条警告信息
-        });
-
-        // 自行关闭
-        $webview.addEventListener("close", () => window.close());
-
+          // 页面 → 内嵌页面（发送初始化消息）
+          webview.contentWindow.postMessage("Hi, webview!", "*");
+        },
+        // 加载失败或取消加载
+        loadabord() {
+          bodyClass.remove("loading");
+        },
         // 模态弹框
-        $webview.addEventListener("dialog", (e) => {
+        dialog(e) {
           const { dialog, messageType, messageText, defaultPromptText } = e;
           switch (messageType) {
             case "alert":
@@ -257,9 +283,73 @@
               const result = prompt(messageText, defaultPromptText);
               dialog[typeof result === "string" ? "ok" : "cancel"](result);
               break;
+            default:
           }
-        });
-      }
+        },
+        // 打开新窗口
+        newwindow(e) {
+          webview.src = e.targetUrl;
+        },
+        // 自行关闭
+        close() {
+          browser.navigate("about:blank");
+        },
+      };
+      Object.entries(webviewEvents).forEach(([eventName, handler]) => {
+        webview.addEventListener(eventName, handler);
+      });
+
+      // 侦听来自 webview 的消息
+      window.addEventListener("message", (event) => {
+        if (event.source === webview.contentWindow) {
+          const { type, data } = event.data;
+          if (type === "webview_info") {
+            favicon.src = data.favicon;
+            title.textContent = data.title;
+          }
+        }
+      });
+
+      // 注入css样式和js脚本
+      webview.addContentScripts([
+        {
+          name: "nw_inject",
+          matches: ["<all_urls>"], // 导航到符合匹配规则的URL时注入
+          css: {
+            code: `
+              ::-webkit-scrollbar {
+                width: 12px;
+                height: 12px;
+              }
+              ::-webkit-scrollbar-track {
+                background-color: #fcfcfc;
+              }
+              ::-webkit-scrollbar-thumb {
+                background-color: #8b8b8b;
+                border-radius: 6px;
+                border: 2px solid #fcfcfc;
+              }
+              ::-webkit-scrollbar-thumb:hover {
+                background-color: #636363;
+              }
+            `,
+            // files: ["mystyle.css"],
+          },
+          js: {
+            code: `console.log("Hi, webview!")`,
+            // files: ["myscript.js"],
+          },
+          run_at: "document_start", // 在DOM加载之前注入
+          all_frames: true,
+        },
+      ]);
+    </script>
+
+    <script>
+      const reloadWatcher = require("node:fs").watch("./", function () {
+        reloadWatcher.close();
+        nw.Window.get().reload();
+      });
     </script>
   </body>
 </html>

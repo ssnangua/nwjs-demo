@@ -4,16 +4,14 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>&lt;input&gt; Demo</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
       * {
         font-size: 14px;
-      }
-      pre {
-        display: inline-block;
-        background: #f2f1f1;
-        border-radius: 4px;
-        padding: 5px 10px;
-        font-weight: bold;
       }
       body > div {
         padding-bottom: 10px;
@@ -21,6 +19,16 @@
       }
       label {
         font-weight: bold;
+      }
+      .hljs {
+        border-radius: 4px;
+      }
+      .hljs-tag .hljs-attr {
+        color: #00b0f0;
+        font-weight: bold;
+      }
+      .hljs-tag .hljs-name {
+        color: #c0504d;
       }
     </style>
   </head>
@@ -34,9 +42,14 @@
     <script>
       document.querySelectorAll("div").forEach((div) => {
         const pre = document.createElement("pre");
-        pre.textContent = div.querySelector("input").outerHTML;
+        pre.innerHTML =
+          `<code class="html">` +
+          div.querySelector("input").outerHTML.replace(/</g, "&lt;") +
+          "</code>";
         div.parentElement.insertBefore(pre, div);
       });
+      hljs.highlightAll();
+
       function log(type, e) {
         console.group(type);
         console.log("input:", e.target);

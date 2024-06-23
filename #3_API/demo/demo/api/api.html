@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>API Example</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="api.css" />
+  </head>
+  <body>
+    <div class="sidebar">
+      <div class="filter-bar">
+        <input id="apiFilterInput" type="text" placeholder="API 过滤" />
+        <span id="apiFilterInputClear"></span>
+        <select id="apiFilterType">
+          <option value="all">全部</option>
+          <option value="P">属性</option>
+          <option value="M">方法</option>
+          <option value="E">事件</option>
+          <option value="X">延伸</option>
+        </select>
+      </div>
+      <div id="apisContainer"></div>
+    </div>
+    <div class="resizer"></div>
+    <div class="content">
+      <div class="toolbar">
+        <div>
+          <button data-tool="openAll">▼ 全部展开</button>
+          <button data-tool="closeAll">▶ 全部折叠</button>
+        </div>
+        <div>
+          <button data-tool="openDocument">文档</button>
+          <button data-tool="showDevTools">开发者工具</button>
+        </div>
+      </div>
+      <div id="snippetsContainer"></div>
+    </div>
+
+    <script type="module" src="api.js"></script>
+
+    <script>
+      window.addEventListener("keydown", (e) => {
+        if (e.key === "F5") nw.Window.get().reload();
+      });
+    </script>
+  </body>
+</html>

@@ -2,6 +2,10 @@
   "name": "demo",
   "main": "demo.html",
   "node-remote": "http://127.0.0.1:5500",
+  "window": {
+    "id": "nwjs-demo",
+    "position": "center"
+  },
   "webview": {
     "partitions": [
       {
