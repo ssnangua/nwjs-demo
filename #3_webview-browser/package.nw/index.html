@@ -25,6 +25,7 @@
         background-color: #f7f7f7;
         border-bottom: 1px solid #ccc;
       }
+      /* 标题栏 */
       #favicon {
         width: 16px;
         height: 16px;
@@ -33,26 +34,45 @@
       #title {
         flex: auto;
       }
+      /* 地址栏 */
       #address {
         flex: auto;
       }
       .find-bar {
         justify-content: flex-end;
       }
+      /* 查找栏 */
       #findResults {
         padding: 0 10px;
       }
+      /* webview */
       .content {
         flex: auto;
         display: flex;
         flex-flow: row;
       }
       #webview {
-        flex: 2;
+        flex: auto;
       }
       #devTools {
-        flex: 1;
+        width: 30vw;
+        min-width: 10vw;
+        max-width: 80vw;
+        flex-shrink: 0;
         border-left: 1px solid #ccc;
+      }
+      /* 调整开发者工具面板大小 */
+      #resizeHandler {
+        width: 8px;
+        margin: 0 -4px;
+        z-index: 1;
+        cursor: ew-resize;
+        display: none;
+      }
+      .resizing #webview,
+      .resizing #devTools {
+        pointer-events: none;
+        user-select: none;
       }
     </style>
     <!-- prettier-ignore -->
@@ -69,7 +89,7 @@
         &.find-matches :is([data-name="findPrev"], [data-name="findNext"])
           { opacity: 1; pointer-events: auto; }
         &.show-find-bar .find-bar { display: flex; }
-        &.show-dev-tools #devTools { display: block; }
+        &.show-dev-tools :is(#devTools, #resizeHandler) { display: block; }
       }
     </style>
   </head>
@@ -96,7 +116,8 @@
       <button data-name="stopFinding">结束</button>
     </div>
     <div class="content">
-      <webview id="webview" src="https://www.baidu.com"></webview>
+      <webview id="webview" src="about:blank"></webview>
+      <div id="resizeHandler"></div>
       <webview id="devTools" src="about:blank" class="hide"></webview>
     </div>
     <script>
@@ -188,6 +209,8 @@
         },
       };
 
+      browser.navigate(localStorage.getItem("url") || "https://www.baidu.com");
+
       // 按钮点击
       document.querySelectorAll("button[data-name]").forEach((el) => {
         el.addEventListener("click", () => {
@@ -215,6 +238,7 @@
             bodyClass.add("loading");
             bodyClass.toggle("can-go-back", webview.canGoBack());
             bodyClass.toggle("can-go-forward", webview.canGoForward());
+            localStorage.setItem("url", webview.src);
           }
         },
         // 文档加载完成
@@ -350,6 +374,27 @@
         reloadWatcher.close();
         nw.Window.get().reload();
       });
+    </script>
+
+    <script type="module">
+      // 调整开发者工具面板大小
+      let layoutState;
+      resizeHandler.addEventListener("mousedown", onResizeStart);
+      function onResizeStart(e) {
+        layoutState = { x: e.x, width: devTools.offsetWidth };
+        resizeHandler.parentElement.classList.add("resizing");
+        window.addEventListener("mousemove", onResize);
+        window.addEventListener("mouseup", onResizeEnd);
+      }
+      function onResize(e) {
+        devTools.style.width = layoutState.width + layoutState.x - e.x + "px";
+      }
+      function onResizeEnd() {
+        layoutState = null;
+        resizeHandler.parentElement.classList.remove("resizing");
+        window.removeEventListener("mousemove", onResize);
+        window.removeEventListener("mouseup", onResizeEnd);
+      }
     </script>
   </body>
 </html>
